@@ -11,6 +11,10 @@
 using namespace std;
 
 int main() {
-	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	Object obj1, obj2;
+	obj1 = Object(42);
+	obj2 = Object();
+
+	obj1.assignParentSlot("obj2", obj2);
 	return 0;
 }

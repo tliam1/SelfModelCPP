@@ -12,6 +12,8 @@
 #include <cstring>
 #include <cassert>  // For assert()
 #include <vector>
+#include <string.h>
+#include <queue>
 using namespace std;
 
 
@@ -42,12 +44,13 @@ struct Messages{
  * and be abstract functions!!!
  */
 class Object{
+public:
 	Object();
 	Object(int val);
 	Object(float val);
 	Object(bool val);
 	Object(char val);
-public:
+
 	vector<Slot> slots;
 	vector<Messages> msg;
 	/*
@@ -66,7 +69,7 @@ public:
     Object evaluateSlot(const Slot& slot) const;
     bool isPrimitiveValue = false;
     bool isPrimitiveFunction = false;
-    void performPrimitiveFunction(const Object& obj) const;
+    int performPrimitiveFunction(const Object& obj) const;
 protected:
 
 private:

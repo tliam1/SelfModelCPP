@@ -52,6 +52,7 @@ Object Object::evaluate() const{
 		return copy;
 	}
 	else if (isPrimitiveFunction) {
+<<<<<<< Updated upstream
 	copy.isPrimitiveFunction = true;
 	performPrimitiveFunction(copy);
 	return copy;
@@ -79,6 +80,37 @@ Object Object::evaluate() const{
 	
 	}
 	return lastResult;
+=======
+		copy.isPrimitiveFunction = true;
+		PrimitiveValue pValClone;
+		pValClone.i = performPrimitiveFunction(copy);
+		copy.pVal = pValClone;
+		return copy;
+	}
+	if (!slots.empty()) {
+		for (const auto& slot : slots) {
+			copy = copy.evaluateSlot(slot);
+		}
+	}
+	if (!msg.empty()) {
+		Object lastResult;
+		for (const auto& message : msg) {
+			for (const auto& slot : slots) {
+				if (message.message == slot.name) {
+					/* Print the parameter's primitive data value
+					* there would be more functionality (I.E. basically function defs)
+					* but I don't have time to more a bunch
+					*/
+					if(message.message == "print"){
+						cout << "Printing: " << slot.reference->pVal.i << endl;
+						lastResult = copy;
+					}
+				}
+			}
+
+		}
+		return lastResult;
+>>>>>>> Stashed changes
 	}
 	return copy;
 }
@@ -106,22 +138,27 @@ Object Object::copy() const{
  *  recursively look in the parent slots via a breadth-first search.
  */
 Object Object::sendAMessage(const string& message) const{
-    for (const auto& slot : slots) {
-        if (slot.name == message) {
-            return evaluateSlot(slot);
-        }
-    }
+	queue<const Object*> bfsQueue;
+	bfsQueue.push(this);
+	while (!bfsQueue.empty()) {
+		const Object* currentObject = bfsQueue.front();
+		bfsQueue.pop();
 
-    for (const auto& slot : slots) {
-        if (slot.parent) {
-            Object parentResult = slot.reference->sendAMessage(message);
-            if (parentResult.pVal.i != -1 || parentResult.pVal.f != -1 || parentResult.pVal.usingBool) {
-                return parentResult;
-            }
-        }
-    }
 
-    return Object();  // I dont know what to return here
+		for (const auto& slot : currentObject->slots) {
+			if (slot.name == message) {
+				// If found, evaluate and return the corresponding object
+				return slot.reference->evaluate();
+			}
+		}
+
+		// If not found, enqueue parent
+		for (const auto& slot : currentObject->slots) {
+			bfsQueue.push(slot.reference);
+		}
+	}
+	// idk what to return if we find nothing
+	return Object();
 }
 
 /*
@@ -132,36 +169,45 @@ Object Object::sendAMessage(const string& message) const{
  */
 
 Object Object::sendAMessageWithParameters(const string& message, const Object& parameter) const{
-    for (const auto& slot : slots) {
-        if (slot.name == message) {
-            Object copy = *this;
-            copy.assignSlot("parameter", parameter);
-            return copy.evaluateSlot(slot);
-        }
-    }
+	std::queue<const Object*> bfsQueue;
+	bfsQueue.push(this);
 
-    for (const auto& slot : slots) {
-         if (slot.parent) {
-             Object parentResult = slot.reference->sendAMessageWithParameters(message, parameter);
-             if (parentResult.pVal.i != -1 || parentResult.pVal.f != -1 || parentResult.pVal.usingBool) {
-                 return parentResult;
-             }
-         }
-     }
-    return Object(); // i still dont know what to return if nothing is found
+	while (!bfsQueue.empty()) {
+		const Object* currentObject = bfsQueue.front();
+		bfsQueue.pop();
+
+		for (auto& slot : currentObject->slots) {
+			if (slot.name == message) {
+				// Set the "parameter" slot
+				//emplace_back = Inserts a new element at the end of the vector, right after its current last element.
+				Slot* parameterSlot = &slot.reference->slots.emplace_back();  // Add a new slot for the parameter
+				parameterSlot->name = "parameter";
+				//TODO: Make a constructor that takes an object and copies all the data
+				parameterSlot->reference = new Object(parameter);  // copy of the parameter
+				// Evaluate and return the corresponding object
+				return slot.reference->evaluate();
+			}
+		}
+
+		// If not found, enqueue parent
+		for (const auto& slot : currentObject->slots) {
+			bfsQueue.push(slot.reference);
+		}
+	}
+	return Object(); // i still dont know what to return if nothing is found
 }
 void Object::assignSlot(const string& name, const Object& reference){
 	/* loop through all slots in object or use hash lookup,
 	 * if name is found in one of the slots
 	 * set the slot reference to the second object
 	 */
-    for (auto& slot : slots) {
-        if (slot.name == name) {
-            // Handle case where the slot already exists
-            slot.reference = new Object(reference);
-            return;
-        }
-    }
+	for (auto& slot : slots) {
+		if (slot.name == name) {
+			// Handle case where the slot already exists
+			slot.reference = new Object(reference);
+			return;
+		}
+	}
 	slots.push_back({name, new Object(reference), false});
 }
 void Object::makeParent(const string& name){
@@ -192,8 +238,7 @@ Object Object::evaluateSlot(const Slot& slot) const {
     return slot.reference->evaluate();
 }
 
-void Object::performPrimitiveFunction(const Object& obj) const{
-	pVal.i = obj.pVal.i * obj.pVal.i;
-	return;
+int Object::performPrimitiveFunction(const Object& obj) const{
+	return obj.pVal.i * obj.pVal.i;
 }
 
