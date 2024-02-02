@@ -58,11 +58,6 @@ Object Object::evaluate() const{
 		copy.pVal = pValClone;
 		return copy;
 	}
-	if (!slots.empty()) {
-		for (const auto& slot : slots) {
-			copy = copy.evaluateSlot(slot);
-		}
-	}
 	if (!msg.empty()) {
 		Object lastResult;
 		for (const auto& message : msg) {
@@ -74,6 +69,7 @@ Object Object::evaluate() const{
 					*/
 					if(message.message == "print"){
 						cout << "Printing: " << slot.reference->pVal.i << endl;
+						copy = slot.reference;
 						lastResult = copy;
 					}
 				}
@@ -124,7 +120,8 @@ Object Object::sendAMessage(const string& message) const{
 
 		// If not found, enqueue parent
 		for (const auto& slot : currentObject->slots) {
-			bfsQueue.push(slot.reference);
+		  if(slot.parent)
+		    bfsQueue.push(slot.reference);
 		}
 	}
 	// idk what to return if we find nothing
@@ -161,7 +158,8 @@ Object Object::sendAMessageWithParameters(const string& message, const Object& p
 
 		// If not found, enqueue parent
 		for (const auto& slot : currentObject->slots) {
-			bfsQueue.push(slot.reference);
+		  if(slot.parent)
+		    bfsQueue.push(slot.reference);
 		}
 	}
 	return Object(); // i still dont know what to return if nothing is found
