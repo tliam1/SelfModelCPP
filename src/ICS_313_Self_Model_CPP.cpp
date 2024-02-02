@@ -16,5 +16,6 @@ int main() {
 	obj2 = Object();
 
 	obj1.assignParentSlot("obj2", obj2);
+
 	return 0;
 }
