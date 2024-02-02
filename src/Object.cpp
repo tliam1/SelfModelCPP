@@ -51,36 +51,36 @@ Object Object::evaluate() const{
 		copy.isPrimitiveValue = true;
 		return copy;
 	}
-    else if (isPrimitiveFunction) {
-        copy.isPrimitiveFunction = true;
-        performPrimitiveFunction(copy);
-        return copy;
-    }
-    if (!slots.empty()) {
-        for (const auto& slot : slots) {
-            copy = copy.evaluateSlot(slot);
-        }
-    }
-    if (!msg.empty()) {
-		Object lastResult;
-		for (const auto& message : msg) {
-			for (const auto& slot : slots) {
-				if (message.message == slot.name) {
-					/* Print the parameter's primitive data value
-					* there would be more functionality (I.E. basically function defs)
-					* but I don't have time to more a bunch
-					*/
-					if(message.message == 'print'){
-						cout << "Printing: " << slot.reference->pVal.i << endl;
-						lastResult = copy;
-					}
-				}
-			}
-
+	else if (isPrimitiveFunction) {
+	copy.isPrimitiveFunction = true;
+	performPrimitiveFunction(copy);
+	return copy;
+	}
+	if (!slots.empty()) {
+		for (const auto& slot : slots) {
+				copy = copy.evaluateSlot(slot);
 		}
-		return lastResult;
-    }
-    return copy;
+	}
+	if (!msg.empty()) {
+	Object lastResult;
+	for (const auto& message : msg) {
+	for (const auto& slot : slots) {
+		if (message.message == slot.name) {
+			/* Print the parameter's primitive data value
+			* there would be more functionality (I.E. basically function defs)
+			* but I don't have time to more a bunch
+			*/
+			if(message.message == 'print'){
+				cout << "Printing: " << slot.reference->pVal.i << endl;
+				lastResult = copy;
+			}
+		}
+	}
+	
+	}
+	return lastResult;
+	}
+	return copy;
 }
 
 
