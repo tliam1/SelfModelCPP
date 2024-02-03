@@ -57,7 +57,6 @@ public:
 
 	vector<Slot> slots;
 	vector<Messages> msg;
-	string name = "~";
 	/*
 	 * Obj may rep a primitve data val (num)
 	 * obj my rep a primitive function

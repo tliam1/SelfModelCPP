@@ -10,35 +10,34 @@
  * can implement slot searches with a hash table
  */
 Object::Object(){
-	slots.clear();
-	pVal=PrimitiveValue();
-	isPrimitiveValue = false;
+  slots.clear();
+  pVal=PrimitiveValue();
+  isPrimitiveValue = false;
 }
 
 Object::Object(int val){
-	slots.clear();
-	pVal.i = val;
-	pVal.usingBool = false;
-	isPrimitiveValue = true;
-	name = "HIT";
+  slots.clear();
+  pVal.i = val;
+  pVal.usingBool = false;
+  isPrimitiveValue = true;
 }
 Object::Object(float val){
-	slots.clear();
-	pVal.f = val;
-	pVal.usingBool = false;
-	isPrimitiveValue = true;
+  slots.clear();
+  pVal.f = val;
+  pVal.usingBool = false;
+  isPrimitiveValue = true;
 }
 Object::Object(bool val){
-	slots.clear();
-	pVal.b = val;
-	pVal.usingBool = true;
-	isPrimitiveValue = true;
+  slots.clear();
+  pVal.b = val;
+  pVal.usingBool = true;
+  isPrimitiveValue = true;
 }
 Object::Object(char val){
-	slots.clear();
-	pVal.c = val;
-	pVal.usingBool = false;
-	isPrimitiveValue = true;
+  slots.clear();
+  pVal.c = val;
+  pVal.usingBool = false;
+  isPrimitiveValue = true;
 }
 
 Object::Object(const Object& obj){
@@ -65,7 +64,7 @@ Object Object::evaluate() {
     int preVal = copy.pVal.i;
     pValClone.i = performPrimitiveFunction(copy);
     copy.pVal = pValClone;
-    cout << "EVALUATE IsPrimitiveFunction: " << name << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
+    cout << "EVALUATE IsPrimitiveFunction: Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
     return copy;
   }
   if (!msg.empty()) {
