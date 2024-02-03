@@ -24,18 +24,24 @@ using namespace std;
  */
 
 int main() {
-  Object obj1 = Object((int)42);
+  // Initialization
+  Object obj1 = Object((int)10);
   Object obj2 = Object();
   Object obj3 = Object();
   Object obj4 = Object();
 
+  // Slot Assignment
   obj2.assignSlot("print", &obj1);
   obj3.assignParentSlot("parent", &obj2);
   obj3.assignSlot("squareOp", &obj1);
   obj1.assignSlot("tailSqrOp", &obj4);
   obj4.assignParentSlot("parent", &obj3);
   obj2.assignSlot("clear", &obj1);
-  obj2.sendAMessage("print");
+
+
+
+  // Message Sending
+  obj2.sendAMessage("print"); // calls print()
   obj2.sendAMessage("clear");
   // squares 42
   obj3.sendAMessageWithParameters("squareOp", &obj1);
@@ -46,7 +52,7 @@ int main() {
   obj4.sendAMessageWithParameters("squareOp", &obj1);
   obj4.sendAMessageWithParameters("squareOp", &obj1);
   obj2.sendAMessage("clear");
-  //one for time for good measure
+  //one for time for good measure (shows that the program clone obj to handle function call)
   obj4.sendAMessageWithParameters("squareOp", &obj1);
 	return 0;
 }

@@ -85,7 +85,7 @@ Object Object::evaluate() {
 
         // TODO: INSTEAD OF CHECKING LIKE THIS, FIND A WAY TO CALL THE FUNCTION USING THE STRING
         if(message.message == "print" || message.function == "print"){
-          cout << "Printing slot pVal: " << pVal.i << endl;
+          print();
           // copy = slot.reference;
           lastResult = copy;
         }else if (message.message == "parameter" && message.function == "performPrimitiveFunction"){
@@ -107,15 +107,13 @@ Object Object::evaluate() {
   return copy;
 }
 
-
+/*
+ *  given an object (this), return a copy of it
+ */
 Object Object::copy() const{
-  /*
-   *  given an object (this), return a copy of it
-   */
   Object copy;
   copy.slots = this->slots;
   copy.pVal = this->pVal;
-  // cout << "COPY: Copied pVal.i: " << copy.pVal.i << " pVal.f: " << copy.pVal.f << endl;
   copy.msg = this->msg;
   return copy;
 
@@ -230,22 +228,53 @@ void Object::makeParent(const string& name){
     }
     cout << "Can't make parent as slot does not exist" << endl;
 }
+
+/*
+ * given an object (this), a string,
+ * and an object, call assignSlot then makeParent.
+ */
 void Object::assignParentSlot(const string& name, Object* reference){
-  /*
-   * given an object (this), a string,
-   * and an object, call assignSlot then makeParent.
-   */
     assignSlot(name, reference);
     makeParent(name);
 }
+
 void Object::print() const{
-	// TODO
+  cout << "" << endl;
+  cout << "" << endl;
+  cout << "" << endl;
+  cout << "STARTING PRINT DUMP MESSAGE" << endl;
+  cout << "Slots" << endl;
+  int i = 0;
+  for (auto& slot : slots) {
+      cout << "Slot " << i << " with name " << slot.name << " has reference to " << slot.reference << endl;
+      i++;
+  }
+  cout << "" << endl;
+  cout << "Messages" << endl;
+  i=0;
+  for (const auto& message : msg) {
+    cout << "message " << i << " with name " << message.message << " has reference to function (default: ~): " << message.function << endl;
+    i++;
+  }
+  cout << "" << endl;
+  cout << "Data Value" << endl;
+  cout << "Has data value (-1 = default): " << pVal.i << endl;
+  cout << "ENDING PRINT DUMP MESSAGE" << endl;
+  cout << "" << endl;
+  cout << "" << endl;
+  cout << "" << endl;
 }
 
+/*
+ * OLD CAN REMOVE
+ */
 Object Object::evaluateSlot(const Slot& slot) const {
     return slot.reference->evaluate();
 }
 
+/*
+ * this is my primitive function
+ */
 int Object::performPrimitiveFunction(const Object& obj) const{
   cout << "Performing Primitive Function" << endl;
 	return obj.pVal.i * obj.pVal.i;
