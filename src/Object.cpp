@@ -50,35 +50,35 @@ Object::Object(const Object& obj){
 }
 
 Object Object::evaluate() {
-	/*
-	 * given an object (this), evaluate it and return the result.
-	 * If the object has a list of messages,
-	 * the object copies itself, sends the messages to the copy, and returns the last result.
-	 */
-	Object copy = this->copy();
-	if (isPrimitiveValue) {
-		copy.isPrimitiveValue = true;
-	}
-	else if (isPrimitiveFunction) {
-		copy.isPrimitiveFunction = true;
-		PrimitiveValue pValClone;
-		int preVal = copy.pVal.i;
-		pValClone.i = performPrimitiveFunction(copy);
-		copy.pVal = pValClone;
-		cout << "EVALUATE IsPrimitiveFunction: " << name << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
-		return copy;
-	}
-	if (!msg.empty()) {
-		Object lastResult;
-		int iterator = 0;
-		for (const auto& message : msg) {
-		  cout << "EVALUATE: comparing msg (" << message.message << ")" << endl;
+  /*
+   * given an object (this), evaluate it and return the result.
+   * If the object has a list of messages,
+   * the object copies itself, sends the messages to the copy, and returns the last result.
+   */
+  Object copy = this->copy();
+  if (isPrimitiveValue) {
+    copy.isPrimitiveValue = true;
+  }
+  else if (isPrimitiveFunction) {
+    copy.isPrimitiveFunction = true;
+    PrimitiveValue pValClone;
+    int preVal = copy.pVal.i;
+    pValClone.i = performPrimitiveFunction(copy);
+    copy.pVal = pValClone;
+    cout << "EVALUATE IsPrimitiveFunction: " << name << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
+    return copy;
+  }
+  if (!msg.empty()) {
+    Object lastResult;
+    int iterator = 0;
+    for (const auto& message : msg) {
+      cout << "EVALUATE: comparing msg (" << message.message << ")" << endl;
         /* Print the parameter's primitive data value
         * there would be more functionality (I.E. basically function defs)
         * but I don't have time to more a bunch
         */
 
-		    // TODO: INSTEAD OF CHECKING LIKE THIS, FIND A WAY TO CALL THE FUNCTION USING THE STRING
+        // TODO: INSTEAD OF CHECKING LIKE THIS, FIND A WAY TO CALL THE FUNCTION USING THE STRING
         if(message.message == "print"){
           cout << "Printing slot pVal: " << pVal.i << endl;
           // copy = slot.reference;
@@ -95,13 +95,13 @@ Object Object::evaluate() {
           lastResult = copy;
         }
         iterator++;
-			}
-		  msg.clear();
+      }
+      msg.clear();
       return lastResult;
-		}else{
-		  cout << "EVALUATE: Error msg list is empty" << endl;
-		}
-	return copy;
+    }else{
+      cout << "EVALUATE: Error msg list is empty" << endl;
+    }
+  return copy;
 }
 
 
@@ -112,7 +112,7 @@ Object Object::copy() const{
   Object copy;
 	copy.slots = this->slots;
 	copy.pVal = this->pVal;
-  cout << "COPY: Copied pVal.i: " << copy.pVal.i << " pVal.f: " << copy.pVal.f << endl;
+  // cout << "COPY: Copied pVal.i: " << copy.pVal.i << " pVal.f: " << copy.pVal.f << endl;
 	copy.msg = this->msg;
 	return copy;
 
