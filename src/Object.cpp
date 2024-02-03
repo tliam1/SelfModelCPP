@@ -106,15 +106,15 @@ Object Object::evaluate() {
 
 
 Object Object::copy() const{
-	/*
-	 *  given an object (this), return a copy of it
-	 */
+  /*
+   *  given an object (this), return a copy of it
+   */
   Object copy;
-	copy.slots = this->slots;
-	copy.pVal = this->pVal;
+  copy.slots = this->slots;
+  copy.pVal = this->pVal;
   // cout << "COPY: Copied pVal.i: " << copy.pVal.i << " pVal.f: " << copy.pVal.f << endl;
-	copy.msg = this->msg;
-	return copy;
+  copy.msg = this->msg;
+  return copy;
 
 }
 
@@ -128,34 +128,34 @@ Object Object::copy() const{
  *  recursively look in the parent slots via a breadth-first search.
  */
 Object Object::sendAMessage(const string& message) const{
-	queue<const Object*> bfsQueue;
-	bfsQueue.push(this);
-	while (!bfsQueue.empty()) {
-		const Object* currentObject = bfsQueue.front();
-		bfsQueue.pop();
+  queue<const Object*> bfsQueue;
+  bfsQueue.push(this);
+  while (!bfsQueue.empty()) {
+    const Object* currentObject = bfsQueue.front();
+    bfsQueue.pop();
 
 
-		for (const auto& slot : currentObject->slots) {
-			if (slot.name == message) {
-				// If found, evaluate and return the corresponding object
-			  Messages newMsg;
-			  newMsg.message = message;
-			  slot.reference->msg.push_back(newMsg);
+    for (const auto& slot : currentObject->slots) {
+      if (slot.name == message) {
+        // If found, evaluate and return the corresponding object
+        Messages newMsg;
+        newMsg.message = message;
+        slot.reference->msg.push_back(newMsg);
         cout << "SendAMessage: Found matching slot name. Returning Evaluated slot ref" << endl;
-				return slot.reference->evaluate();
-			}
-		}
+        return slot.reference->evaluate();
+      }
+    }
 
-		// If not found, enqueue parent
-		for (const auto& slot : currentObject->slots) {
-		  cout << "Searching Parent Slots" << endl;
-		  if(slot.parent)
-		    bfsQueue.push(slot.reference);
-		}
-	}
-	// idk what to return if we find nothing
-	cout << "SendAMessage: Error! Nothing Found" << endl;
-	return Object();
+    // If not found, enqueue parent
+    for (const auto& slot : currentObject->slots) {
+      cout << "Searching Parent Slots" << endl;
+      if(slot.parent)
+        bfsQueue.push(slot.reference);
+    }
+  }
+  // idk what to return if we find nothing
+  cout << "SendAMessage: Error! Nothing Found" << endl;
+  return Object();
 }
 
 /*
@@ -166,58 +166,58 @@ Object Object::sendAMessage(const string& message) const{
  */
 
 Object Object::sendAMessageWithParameters(const string& message, Object* parameter) const{
-	std::queue<const Object*> bfsQueue;
-	bfsQueue.push(this);
+  queue<const Object*> bfsQueue;
+  bfsQueue.push(this);
 
-	while (!bfsQueue.empty()) {
-		const Object* currentObject = bfsQueue.front();
-		bfsQueue.pop();
+  while (!bfsQueue.empty()) {
+    const Object* currentObject = bfsQueue.front();
+    bfsQueue.pop();
 
-		for (auto& slot : currentObject->slots) {
-			if (slot.name == message) {
-				// Set the "parameter" slot
+    for (auto& slot : currentObject->slots) {
+      if (slot.name == message) {
+        // Set the "parameter" slot
         Messages newMsg;
         newMsg.message = "parameter";
         newMsg.function = "performPrimitiveFunction";
 
         slot.reference->msg.push_back(newMsg);
-				cout << "sendAMessageWithParameters:Message matched slot name -> creating parameter slot" << endl;
-				// Evaluate and return the corresponding object
-				return slot.reference->evaluate();
-			}
-		}
+        cout << "sendAMessageWithParameters:Message matched slot name -> creating parameter slot" << endl;
+        // Evaluate and return the corresponding object
+        return slot.reference->evaluate();
+      }
+    }
 
-		// If not found, enqueue parent
-		for (const auto& slot : currentObject->slots) {
-		  if(slot.parent){
-		    bfsQueue.push(slot.reference);
-		    cout << "sendAMessageWithParameters: Searching Parent slot reference" << endl;
-		  }
-		}
-	}
-	cout << "SendMessageWithParameters: Error! Nothing Found" << endl;
-	return Object(); // i still dont know what to return if nothing is found
+    // If not found, enqueue parent
+    for (const auto& slot : currentObject->slots) {
+      if(slot.parent){
+        bfsQueue.push(slot.reference);
+        cout << "sendAMessageWithParameters: Searching Parent slot reference" << endl;
+      }
+    }
+  }
+  cout << "SendMessageWithParameters: Error! Nothing Found" << endl;
+  return Object(); // i still dont know what to return if nothing is found
 }
 void Object::assignSlot(const string& name, Object* reference){
-	/* loop through all slots in object or use hash lookup,
-	 * if name is found in one of the slots
-	 * set the slot reference to the second object
-	 */
-	for (auto& slot : slots) {
-		if (slot.name == name) {
-			// Handle case where the slot already exists
-		  cout << "Slot with name " << name << " Exists. Changing the reference!" << endl;
-			slot.reference = reference;
-			return;
-		}
-	}
-	cout << "Slot with name " << name << " does not exist. Making new slot!" << endl;
-	slots.push_back({name, reference, false});
+  /* loop through all slots in object or use hash lookup,
+   * if name is found in one of the slots
+   * set the slot reference to the second object
+   */
+  for (auto& slot : slots) {
+    if (slot.name == name) {
+      // Handle case where the slot already exists
+      cout << "Slot with name " << name << " Exists. Changing the reference!" << endl;
+      slot.reference = reference;
+      return;
+    }
+  }
+  cout << "Slot with name " << name << " does not exist. Making new slot!" << endl;
+  slots.push_back({name, reference, false});
 }
 void Object::makeParent(const string& name){
-	/* given an object (this) and a string, designate
-	 * the slot named by the string (if it exists) as a parent slot.
-	 */
+  /* given an object (this) and a string, designate
+   * the slot named by the string (if it exists) as a parent slot.
+   */
     for (auto& slot : slots) {
         if (slot.name == name) {
             slot.parent = true;
@@ -228,10 +228,10 @@ void Object::makeParent(const string& name){
     cout << "Can't make parent as slot does not exist" << endl;
 }
 void Object::assignParentSlot(const string& name, Object* reference){
-/*
- * given an object (this), a string,
- * and an object, call assignSlot then makeParent.
- */
+  /*
+   * given an object (this), a string,
+   * and an object, call assignSlot then makeParent.
+   */
     assignSlot(name, reference);
     makeParent(name);
 }
