@@ -20,6 +20,7 @@ Object::Object(int val){
 	pVal.i = val;
 	pVal.usingBool = false;
 	isPrimitiveValue = true;
+	name = "HIT";
 }
 Object::Object(float val){
 	slots.clear();
@@ -40,7 +41,15 @@ Object::Object(char val){
 	isPrimitiveValue = true;
 }
 
-Object Object::evaluate() const{
+Object::Object(const Object& obj){
+  slots.clear();
+  slots = obj.slots;
+  pVal = obj.pVal;
+  isPrimitiveValue = obj.isPrimitiveValue;
+
+}
+
+Object Object::evaluate() {
 	/*
 	 * given an object (this), evaluate it and return the result.
 	 * If the object has a list of messages,
@@ -49,35 +58,49 @@ Object Object::evaluate() const{
 	Object copy = this->copy();
 	if (isPrimitiveValue) {
 		copy.isPrimitiveValue = true;
-		return copy;
 	}
 	else if (isPrimitiveFunction) {
 		copy.isPrimitiveFunction = true;
 		PrimitiveValue pValClone;
+		int preVal = copy.pVal.i;
 		pValClone.i = performPrimitiveFunction(copy);
 		copy.pVal = pValClone;
+		cout << "EVALUATE IsPrimitiveFunction: " << name << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
 		return copy;
 	}
 	if (!msg.empty()) {
 		Object lastResult;
+		int iterator = 0;
 		for (const auto& message : msg) {
-			for (const auto& slot : slots) {
-				if (message.message == slot.name) {
-					/* Print the parameter's primitive data value
-					* there would be more functionality (I.E. basically function defs)
-					* but I don't have time to more a bunch
-					*/
-					if(message.message == "print"){
-						cout << "Printing: " << slot.reference->pVal.i << endl;
-						copy = slot.reference;
-						lastResult = copy;
-					}
-				}
-			}
+		  cout << "EVALUATE: comparing msg (" << message.message << ")" << endl;
+        /* Print the parameter's primitive data value
+        * there would be more functionality (I.E. basically function defs)
+        * but I don't have time to more a bunch
+        */
 
+		    // TODO: INSTEAD OF CHECKING LIKE THIS, FIND A WAY TO CALL THE FUNCTION USING THE STRING
+        if(message.message == "print"){
+          cout << "Printing slot pVal: " << pVal.i << endl;
+          // copy = slot.reference;
+          lastResult = copy;
+        }else if (message.message == "parameter" && message.function == "performPrimitiveFunction"){
+          copy.isPrimitiveFunction = true;
+          PrimitiveValue pValClone;
+          int preVal = copy.pVal.i;
+          pValClone.i = performPrimitiveFunction(copy);
+          copy.pVal = pValClone;
+          cout << "EVALUATE MESSAGE: " << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
+          //copy = slot.reference;
+
+          lastResult = copy;
+        }
+        iterator++;
+			}
+		  msg.clear();
+      return lastResult;
+		}else{
+		  cout << "EVALUATE: Error msg list is empty" << endl;
 		}
-		return lastResult;
-	}
 	return copy;
 }
 
@@ -86,9 +109,10 @@ Object Object::copy() const{
 	/*
 	 *  given an object (this), return a copy of it
 	 */
-	Object copy = new Object();
+  Object copy;
 	copy.slots = this->slots;
 	copy.pVal = this->pVal;
+  cout << "COPY: Copied pVal.i: " << copy.pVal.i << " pVal.f: " << copy.pVal.f << endl;
 	copy.msg = this->msg;
 	return copy;
 
@@ -114,17 +138,23 @@ Object Object::sendAMessage(const string& message) const{
 		for (const auto& slot : currentObject->slots) {
 			if (slot.name == message) {
 				// If found, evaluate and return the corresponding object
+			  Messages newMsg;
+			  newMsg.message = message;
+			  slot.reference->msg.push_back(newMsg);
+        cout << "SendAMessage: Found matching slot name. Returning Evaluated slot ref" << endl;
 				return slot.reference->evaluate();
 			}
 		}
 
 		// If not found, enqueue parent
 		for (const auto& slot : currentObject->slots) {
+		  cout << "Searching Parent Slots" << endl;
 		  if(slot.parent)
 		    bfsQueue.push(slot.reference);
 		}
 	}
 	// idk what to return if we find nothing
+	cout << "SendAMessage: Error! Nothing Found" << endl;
 	return Object();
 }
 
@@ -135,7 +165,7 @@ Object Object::sendAMessage(const string& message) const{
  * If the object doesn’t directly have a slot with that name, recursively look in the parent slots via a breadth-first search.
  */
 
-Object Object::sendAMessageWithParameters(const string& message, const Object& parameter) const{
+Object Object::sendAMessageWithParameters(const string& message, Object* parameter) const{
 	std::queue<const Object*> bfsQueue;
 	bfsQueue.push(this);
 
@@ -146,11 +176,12 @@ Object Object::sendAMessageWithParameters(const string& message, const Object& p
 		for (auto& slot : currentObject->slots) {
 			if (slot.name == message) {
 				// Set the "parameter" slot
-				//emplace_back = Inserts a new element at the end of the vector, right after its current last element.
-				Slot* parameterSlot = &slot.reference->slots.emplace_back();  // Add a new slot for the parameter
-				parameterSlot->name = "parameter";
-				//TODO: Make a constructor that takes an object and copies all the data
-				parameterSlot->reference = new Object(parameter);  // copy of the parameter
+        Messages newMsg;
+        newMsg.message = "parameter";
+        newMsg.function = "performPrimitiveFunction";
+
+        slot.reference->msg.push_back(newMsg);
+				cout << "sendAMessageWithParameters:Message matched slot name -> creating parameter slot" << endl;
 				// Evaluate and return the corresponding object
 				return slot.reference->evaluate();
 			}
@@ -158,13 +189,16 @@ Object Object::sendAMessageWithParameters(const string& message, const Object& p
 
 		// If not found, enqueue parent
 		for (const auto& slot : currentObject->slots) {
-		  if(slot.parent)
+		  if(slot.parent){
 		    bfsQueue.push(slot.reference);
+		    cout << "sendAMessageWithParameters: Searching Parent slot reference" << endl;
+		  }
 		}
 	}
+	cout << "SendMessageWithParameters: Error! Nothing Found" << endl;
 	return Object(); // i still dont know what to return if nothing is found
 }
-void Object::assignSlot(const string& name, const Object& reference){
+void Object::assignSlot(const string& name, Object* reference){
 	/* loop through all slots in object or use hash lookup,
 	 * if name is found in one of the slots
 	 * set the slot reference to the second object
@@ -172,11 +206,13 @@ void Object::assignSlot(const string& name, const Object& reference){
 	for (auto& slot : slots) {
 		if (slot.name == name) {
 			// Handle case where the slot already exists
-			slot.reference = new Object(reference);
+		  cout << "Slot with name " << name << " Exists. Changing the reference!" << endl;
+			slot.reference = reference;
 			return;
 		}
 	}
-	slots.push_back({name, new Object(reference), false});
+	cout << "Slot with name " << name << " does not exist. Making new slot!" << endl;
+	slots.push_back({name, reference, false});
 }
 void Object::makeParent(const string& name){
 	/* given an object (this) and a string, designate
@@ -185,12 +221,13 @@ void Object::makeParent(const string& name){
     for (auto& slot : slots) {
         if (slot.name == name) {
             slot.parent = true;
+            cout << "Slot with name " << slot.name << " is now a parent" << endl;
             return;
         }
     }
     cout << "Can't make parent as slot does not exist" << endl;
 }
-void Object::assignParentSlot(const string& name, const Object& reference){
+void Object::assignParentSlot(const string& name, Object* reference){
 /*
  * given an object (this), a string,
  * and an object, call assignSlot then makeParent.
@@ -207,6 +244,7 @@ Object Object::evaluateSlot(const Slot& slot) const {
 }
 
 int Object::performPrimitiveFunction(const Object& obj) const{
+  cout << "Performing Primitive Function" << endl;
 	return obj.pVal.i * obj.pVal.i;
 }
 

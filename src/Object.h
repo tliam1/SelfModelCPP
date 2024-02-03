@@ -14,6 +14,7 @@
 #include <vector>
 #include <string.h>
 #include <queue>
+#include <algorithm>
 using namespace std;
 
 
@@ -37,6 +38,8 @@ struct PrimitiveValue{
 
 struct Messages{
 	string message;
+	string function = "~"; //using tilda as a default
+	// the function would be a ref to an actual function that would be called if a message is sent
 };
 /*
  * TODO: A lot of these functions
@@ -50,26 +53,28 @@ public:
 	Object(float val);
 	Object(bool val);
 	Object(char val);
+	Object(const Object& obj);
 
 	vector<Slot> slots;
 	vector<Messages> msg;
+	string name = "~";
 	/*
 	 * Obj may rep a primitve data val (num)
 	 * obj my rep a primitive function
 	 */
-	PrimitiveValue pVal;
-    Object evaluate() const;
-    Object copy() const;
-    Object sendAMessage(const string& message) const;
-    Object sendAMessageWithParameters(const string& message, const Object& parameter) const;
-    void assignSlot(const string& name, const Object& reference);
-    void makeParent(const string& name);
-    void assignParentSlot(const string& name, const Object& reference);
-    void print() const;
-    Object evaluateSlot(const Slot& slot) const;
-    bool isPrimitiveValue = false;
-    bool isPrimitiveFunction = false;
-    int performPrimitiveFunction(const Object& obj) const;
+  PrimitiveValue pVal;
+  Object evaluate();
+  Object copy() const;
+  Object sendAMessage(const string& message) const;
+  Object sendAMessageWithParameters(const string& message, Object* parameter) const;
+  void assignSlot(const string& name, Object* reference);
+  void makeParent(const string& name);
+  void assignParentSlot(const string& name, Object* reference);
+  void print() const;
+  Object evaluateSlot(const Slot& slot) const;
+  bool isPrimitiveValue = false;
+  bool isPrimitiveFunction = false;
+  int performPrimitiveFunction(const Object& obj) const;
 protected:
 
 private:
