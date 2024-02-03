@@ -71,14 +71,20 @@ Object Object::evaluate() {
     Object lastResult;
     int iterator = 0;
     for (const auto& message : msg) {
-      cout << "EVALUATE: comparing msg (" << message.message << ")" << endl;
+      if (message.message == "clear"){
+           msg.clear();
+           cout << "EVALUATE MESSAGE: CLEARED" << endl;
+           return lastResult;
+      }
+    }
+    for (const auto& message : msg) {
         /* Print the parameter's primitive data value
         * there would be more functionality (I.E. basically function defs)
         * but I don't have time to more a bunch
         */
 
         // TODO: INSTEAD OF CHECKING LIKE THIS, FIND A WAY TO CALL THE FUNCTION USING THE STRING
-        if(message.message == "print"){
+        if(message.message == "print" || message.function == "print"){
           cout << "Printing slot pVal: " << pVal.i << endl;
           // copy = slot.reference;
           lastResult = copy;
@@ -90,12 +96,10 @@ Object Object::evaluate() {
           copy.pVal = pValClone;
           cout << "EVALUATE MESSAGE: " << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
           //copy = slot.reference;
-
-          lastResult = copy;
         }
+        lastResult = copy;
         iterator++;
       }
-      msg.clear();
       return lastResult;
     }else{
       cout << "EVALUATE: Error msg list is empty" << endl;
@@ -205,7 +209,7 @@ void Object::assignSlot(const string& name, Object* reference){
   for (auto& slot : slots) {
     if (slot.name == name) {
       // Handle case where the slot already exists
-      cout << "Slot with name " << name << " Exists. Changing the reference!" << endl;
+      cout << "ASSIGN SLOT: Slot with name " << name << " Exists. Changing the reference!" << endl;
       slot.reference = reference;
       return;
     }

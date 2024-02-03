@@ -30,14 +30,23 @@ int main() {
   Object obj4 = Object();
 
   obj2.assignSlot("print", &obj1);
-  obj3.assignParentSlot("print", &obj2);
+  obj3.assignParentSlot("parent", &obj2);
   obj3.assignSlot("squareOp", &obj1);
   obj1.assignSlot("tailSqrOp", &obj4);
   obj4.assignParentSlot("parent", &obj3);
-
+  obj2.assignSlot("clear", &obj1);
   obj2.sendAMessage("print");
+  obj2.sendAMessage("clear");
+  // squares 42
   obj3.sendAMessageWithParameters("squareOp", &obj1);
-
+  obj2.sendAMessage("clear"); // clears obj1 message vector
+  // this way requires a BTS through parents
+  // idk if this counts as a 'loop' but it will send mult messages which will
+  // get 42*42 = res then res * res = 2nd res
+  obj4.sendAMessageWithParameters("squareOp", &obj1);
+  obj4.sendAMessageWithParameters("squareOp", &obj1);
+  obj2.sendAMessage("clear");
+  //one for time for good measure
   obj4.sendAMessageWithParameters("squareOp", &obj1);
 	return 0;
 }
