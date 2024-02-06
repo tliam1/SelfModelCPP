@@ -39,6 +39,7 @@ struct PrimitiveValue{
 struct Messages{
 	string message;
 	string function = "~"; //using tilda as a default
+	Object* param;
 	// the function would be a ref to an actual function that would be called if a message is sent
 };
 /*

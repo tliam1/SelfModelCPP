@@ -13,6 +13,7 @@ Object::Object(){
   slots.clear();
   pVal=PrimitiveValue();
   isPrimitiveValue = false;
+  isPrimitiveFunction = false;
 }
 
 Object::Object(int val){
@@ -57,17 +58,20 @@ Object Object::evaluate() {
   Object copy = this->copy();
   if (isPrimitiveValue) {
     copy.isPrimitiveValue = true;
+    return copy;
   }
   else if (isPrimitiveFunction) {
     copy.isPrimitiveFunction = true;
+    copy.isPrimitiveValue = true;
+    copy.evaluate();
     PrimitiveValue pValClone;
     int preVal = copy.pVal.i;
     pValClone.i = performPrimitiveFunction(copy);
     copy.pVal = pValClone;
-    cout << "EVALUATE IsPrimitiveFunction: Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
+
+    //cout << "EVALUATE IsPrimitiveFunction: Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
     return copy;
-  }
-  if (!msg.empty()) {
+  } else if (!msg.empty()) {
     Object lastResult;
     int iterator = 0;
     for (const auto& message : msg) {
@@ -90,15 +94,17 @@ Object Object::evaluate() {
           lastResult = copy;
         }else if (message.message == "parameter" && message.function == "performPrimitiveFunction"){
           copy.isPrimitiveFunction = true;
-          PrimitiveValue pValClone;
-          int preVal = copy.pVal.i;
-          pValClone.i = performPrimitiveFunction(copy);
-          copy.pVal = pValClone;
-          cout << "EVALUATE MESSAGE: " << ": Arithmetic Result of Primitive Function: " << preVal << " * " << preVal << " = " << copy.pVal.i << endl;
-          //copy = slot.reference;
+          if(copy.pVal.i == -1){
+            copy.pVal = message.param->pVal;
+          }
+
+          copy.pVal.i = copy.evaluate().pVal.i;
         }
         lastResult = copy;
         iterator++;
+      }
+      if(copy.isPrimitiveFunction){
+        cout << "EVALUATE: Arithmetic Result of Primitive Function (sqr operations): " << copy.pVal.i << endl;
       }
       return lastResult;
     }else{
@@ -154,9 +160,7 @@ Object Object::sendAMessage(const string& message) const{
         bfsQueue.push(slot.reference);
     }
   }
-  // idk what to return if we find nothing
-  cout << "SendAMessage: Error! Nothing Found" << endl;
-  return Object();
+  assert("Parent Not FOund");
 }
 
 /*
@@ -180,6 +184,7 @@ Object Object::sendAMessageWithParameters(const string& message, Object* paramet
         Messages newMsg;
         newMsg.message = "parameter";
         newMsg.function = "performPrimitiveFunction";
+        newMsg.param = parameter;
 
         slot.reference->msg.push_back(newMsg);
         cout << "sendAMessageWithParameters:Message matched slot name -> creating parameter slot" << endl;
@@ -196,8 +201,7 @@ Object Object::sendAMessageWithParameters(const string& message, Object* paramet
       }
     }
   }
-  cout << "SendMessageWithParameters: Error! Nothing Found" << endl;
-  return Object(); // i still dont know what to return if nothing is found
+  assert("Parent Not FOund");
 }
 void Object::assignSlot(const string& name, Object* reference){
   /* loop through all slots in object or use hash lookup,
@@ -276,7 +280,6 @@ Object Object::evaluateSlot(const Slot& slot) const {
  * this is my primitive function
  */
 int Object::performPrimitiveFunction(const Object& obj) const{
-  cout << "Performing Primitive Function" << endl;
 	return obj.pVal.i * obj.pVal.i;
 }
 
